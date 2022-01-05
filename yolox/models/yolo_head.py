@@ -387,8 +387,9 @@ class YOLOXHead(nn.Module):
         loss_iou = (
             self.iou_loss(bbox_preds.view(-1, 4)[fg_masks], reg_targets)
         ).sum() / num_fg
+        bce_loss = self.bcewithlog_loss(obj_preds.view(-1, 1), obj_targets)
         loss_obj = (
-            self.bcewithlog_loss(obj_preds.view(-1, 1), obj_targets)
+            (1-torch.exp(-bce_loss))**2*bce_loss
         ).sum() / num_fg
         loss_cls = (
             self.bcewithlog_loss(
